@@ -1,2 +1,4 @@
-*.pdf
-*.swp
+*
+!*.cpp
+!*.h
+!Makefile
