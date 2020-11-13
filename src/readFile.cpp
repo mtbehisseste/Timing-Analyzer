@@ -26,14 +26,7 @@ using namespace std;
     }                                                                                   \
     getline(fLib, strline);
 
-#define FIND_NET(netType, circuitNet, subStrNum)                                    \
-    while (getline(fsCircuit, line)) {                                              \
-        if (line.find(#netType) != string::npos) {                                  \
-            line = line.substr(line.find(#netType) + subStrNum);                    \
-            break;                                                                  \
-        }                                                                           \
-    }                                                                               \
-                                                                                    \
+#define FIND_NET(circuitNet)                                                        \
     while (true) {                                                                  \
         subline = line;                                                             \
         subline.erase(remove(subline.begin(), subline.end(), ' '), subline.end());  \
@@ -168,8 +161,29 @@ void readCircuit(Circuit &circuit, string circuitName)
     string line, subline;
     char netName[20];
 
-    FIND_NET(input, inputNet, 6);
-    FIND_NET(output, outputNet, 7);
-    FIND_NET(wire, wireNet, 5);
+    while (getline(fsCircuit, line)) {
+        if (line.find("input") != string::npos) {
+            if (line.find("//") == string::npos ||
+                    (line.find("//") != string::npos &&
+                    line.find("input") < line.find("//"))) {
+                line = line.substr(line.find("input") + 6);
+                FIND_NET(inputNet);
+            }
+        } else if (line.find("output") != string::npos) {
+            if (line.find("//") == string::npos ||
+                    (line.find("//") != string::npos &&
+                    line.find("output") < line.find("//"))) {
+                line = line.substr(line.find("output") + 7);
+                FIND_NET(outputNet);
+            }
+        } else if (line.find("wire") != string::npos) {
+            if (line.find("//") == string::npos ||
+                    (line.find("//") != string::npos &&
+                    line.find("wire") < line.find("//"))) {
+                line = line.substr(line.find("wire") + 5);
+                FIND_NET(wireNet);
+            }
+        }
+    }
     
 }
