@@ -6,7 +6,7 @@ int main() {
     
     std::string libName = "../lib/test_lib.lib";
     
-    Node *libHead;
+    Node *libHead = NULL;
     readLibrary(libHead, libName);
 
     return 0;
