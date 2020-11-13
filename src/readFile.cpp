@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cassert>
+#include <algorithm>
 
 #include "readFile.h"
 
@@ -25,7 +26,37 @@ using namespace std;
     }                                                                                   \
     getline(fLib, strline);
 
-void readLibrary(Node *&libHead, string libName)
+#define FIND_NET(netType, circuitNet, subStrNum)                                    \
+    while (getline(fsCircuit, line)) {                                              \
+        if (line.find(#netType) != string::npos) {                                  \
+            line = line.substr(line.find(#netType) + subStrNum);                    \
+            break;                                                                  \
+        }                                                                           \
+    }                                                                               \
+                                                                                    \
+    while (true) {                                                                  \
+        subline = line;                                                             \
+        subline.erase(remove(subline.begin(), subline.end(), ' '), subline.end());  \
+        while (subline.find(",") != string::npos) {                                 \
+            sscanf(subline.c_str(), "%[^,]", netName);                              \
+            cout << netName << endl;                                                \
+            Net *net = new Net(string(netName));                                    \
+            circuit.circuitNet.push_back(net);                                      \
+            subline = subline.substr(subline.find_first_of(",") + 1);               \
+        }                                                                           \
+                                                                                    \
+        if (subline.find(";") != string::npos) {                                    \
+            sscanf(subline.c_str(), "%[^;]", netName);                              \
+            cout << netName << endl;                                                \
+            Net *net = new Net(netName);                                            \
+            circuit.circuitNet.push_back(net);                                      \
+            break;                                                                  \
+        }                                                                           \
+                                                                                    \
+        getline(fsCircuit, line);                                                   \
+    }
+
+void readLibrary(map<string, Gate *> &libCell, string libName)
 {
     ifstream fLib;
     fLib.open(libName.c_str(), ios::in);
@@ -57,7 +88,6 @@ void readLibrary(Node *&libHead, string libName)
     // parse library cells
     char s[20];
     float f;
-    Node *cur;
     while (!fLib.eof()) {
         // cell
         while (getline(fLib, strline)) {
@@ -65,7 +95,6 @@ void readLibrary(Node *&libHead, string libName)
                 break;
         }
         sscanf(strline.c_str(), "cell (%[^)] {", s);
-        cout << "cell " << s << endl;
         Gate *cell = new Gate(string(s));
 
         // pin
@@ -123,12 +152,24 @@ void readLibrary(Node *&libHead, string libName)
             cout << cell->input[i]->capacitance<< endl;
         }
 
-        if (!libHead) {  // if is first cell
-            libHead = new Node(cell);
-            cur = libHead;
-        } else {
-            cur->next = new Node(cell);
-            cur = cur->next;
-        }
+        libCell.insert(make_pair(cell->name, cell));
     }
+}
+
+void readCircuit(Circuit &circuit, string circuitName)
+{
+    ifstream fsCircuit;
+    fsCircuit.open(circuitName, ios::in);
+    if (!fsCircuit) {
+        cout << "Error opening circuit file\n";
+        exit(-1);
+    }
+
+    string line, subline;
+    char netName[20];
+
+    FIND_NET(input, inputNet, 6);
+    FIND_NET(output, outputNet, 7);
+    FIND_NET(wire, wireNet, 5);
+    
 }

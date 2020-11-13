@@ -1,4 +1,4 @@
 #include "circuit.h"
 
-void readLibrary(Node *&libHead, std::string libName);
-void readCircuit();
+void readLibrary(std::map<std::string, Gate *> &libHead, std::string libName);
+void readCircuit(Circuit &circuitHead, std::string circuitName);

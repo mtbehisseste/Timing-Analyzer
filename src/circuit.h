@@ -47,19 +47,26 @@ class Net {
 public:
     std::string name;
     int signal = -1;
+    // if this net is input/output of the gates
+    // the variable name of the net will also be
+    // recorded in pin->name of the gate
+    std::vector<Gate *> inputGate;
+    std::vector<Gate *> outputGate;
 
-    Net() {}
+    Net(std::string s): name(s){}
 private:
 };
 
 /*
- * each node of the list is a cell in
- * cell library or a gate in benchmarks
+ * data structure of a circuit
  */
-struct Node {
-    Gate *gate = NULL;
-    Node *next = NULL;
-    Node(Gate* gate): gate(gate) {}
+class Circuit {
+public:
+    std::vector<Gate *> circuitGate;
+    std::vector<Net *> inputNet;
+    std::vector<Net *> outputNet;
+    std::vector<Net *> wireNet;
+private:
 };
 
 #endif

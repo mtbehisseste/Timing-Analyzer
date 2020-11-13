@@ -2,12 +2,16 @@
 #include "readFile.h"
 
 int main() {
-    // argparse
+    // TODO argparse
     
     std::string libName = "../lib/test_lib.lib";
+    std::string circuitName = "../benchmarks/c432.v";
     
-    Node *libHead = NULL;
-    readLibrary(libHead, libName);
+    std::map<std::string, Gate *> libCell;
+    readLibrary(libCell, libName);
+
+    Circuit circuit;
+    readCircuit(circuit, circuitName);
 
     return 0;
 }
