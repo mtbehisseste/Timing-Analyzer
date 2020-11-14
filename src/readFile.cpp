@@ -32,7 +32,6 @@ using namespace std;
         subline.erase(remove(subline.begin(), subline.end(), ' '), subline.end());  \
         while (subline.find(",") != string::npos) {                                 \
             sscanf(subline.c_str(), "%[^,]", netName);                              \
-            cout << netName << endl;                                                \
             Net *net = new Net(string(netName));                                    \
             circuit.circuitNet.push_back(net);                                      \
             subline = subline.substr(subline.find_first_of(",") + 1);               \
@@ -40,7 +39,6 @@ using namespace std;
                                                                                     \
         if (subline.find(";") != string::npos) {                                    \
             sscanf(subline.c_str(), "%[^;]", netName);                              \
-            cout << netName << endl;                                                \
             Net *net = new Net(netName);                                            \
             circuit.circuitNet.push_back(net);                                      \
             break;                                                                  \
@@ -106,7 +104,6 @@ void readLibrary(map<string, Gate *> &libCell, string libName)
 
             // if is output pin
             if (pin->direction == 1) {
-                size_t first_quote, last_quote;
                 string sf;
 
                 getline(fLib, strline);  // internal_power()
@@ -124,32 +121,20 @@ void readLibrary(map<string, Gate *> &libCell, string libName)
                 getline(fLib, strline);  // }
                 getline(fLib, strline);  // }
                 getline(fLib, strline);  // }
-                cell->output.push_back(pin);
+                cell->outputPin.push_back(pin);
                 break;  // output pin must be the last pin
             } else {
                 getline(fLib, strline);  // }
-                cell->input.push_back(pin);
+                cell->inputPin.push_back(pin);
             }
-        }
-
-        cout << endl;
-        for (int i = 0; i < 7; ++i) {
-            for (int j = 0; j < 7; ++j) {
-                cout << cell->cell_fall[pair<float, float>(outputCapacitance[i], inputTransitionTime[j])] << ' ';
-            }
-            cout << endl;
-        }
-
-        cout << cell->input.size() << endl;
-        for (int i = 0; i < cell->input.size(); ++i) {
-            cout << cell->input[i]->capacitance<< endl;
         }
 
         libCell.insert(make_pair(cell->name, cell));
     }
 }
 
-void readCircuit(Circuit &circuit, string circuitName)
+void readCircuit(Circuit &circuit, string circuitName,
+        map<string, Gate *> libCell)
 {
     ifstream fsCircuit;
     fsCircuit.open(circuitName, ios::in);
@@ -161,6 +146,9 @@ void readCircuit(Circuit &circuit, string circuitName)
     string line, subline;
     char netName[20];
 
+    // TODO deal with comments: process once a line
+    // parsing inputs, outputs, wires
+    int netFlag = 0;
     while (getline(fsCircuit, line)) {
         if (line.find("input") != string::npos) {
             if (line.find("//") == string::npos ||
@@ -168,6 +156,7 @@ void readCircuit(Circuit &circuit, string circuitName)
                     line.find("input") < line.find("//"))) {
                 line = line.substr(line.find("input") + 6);
                 FIND_NET(inputNet);
+                netFlag++;
             }
         } else if (line.find("output") != string::npos) {
             if (line.find("//") == string::npos ||
@@ -175,6 +164,7 @@ void readCircuit(Circuit &circuit, string circuitName)
                     line.find("output") < line.find("//"))) {
                 line = line.substr(line.find("output") + 7);
                 FIND_NET(outputNet);
+                netFlag++;
             }
         } else if (line.find("wire") != string::npos) {
             if (line.find("//") == string::npos ||
@@ -182,8 +172,100 @@ void readCircuit(Circuit &circuit, string circuitName)
                     line.find("wire") < line.find("//"))) {
                 line = line.substr(line.find("wire") + 5);
                 FIND_NET(wireNet);
+                netFlag++;
             }
         }
+        if (netFlag == 3)
+            break;  // input, output, wire are parsed
+    }
+
+    // parsing cells
+    char cellFootprint[20];
+    char cellName[20];
+    int commentFlag = 0;
+    while (getline(fsCircuit, line)) {
+        // deal with different comments
+        if (commentFlag == 1) {
+            if (line.find("*/") != string::npos) {
+                line = line.substr(line.find("*/") + 2);
+                commentFlag = 0;
+            } else
+                continue;
+        }
+        if (line.find("//") != string::npos)
+            line = line.substr(0, line.find("//") - 1);
+        if (line.find("/*") != string::npos) {
+            if (line.find("*/") != string::npos) {
+                line = line.substr(0, line.find("/*") - 1)
+                    + line.substr(line.find("*/") + 2);
+            } else {
+                line = line.substr(0, line.find("/*") - 1);
+                commentFlag = 1;
+            }
+        }
+
+        if (line.find(";") == string::npos)
+            continue;
+        if (line.find("endmodule") != string::npos)
+            break;
+
+        replace(line.begin(), line.end(), '(', ' ');
+        replace(line.begin(), line.end(), ')', ' ');
+        replace(line.begin(), line.end(), '.', ' ');
+        replace(line.begin(), line.end(), ',', ' ');
+
+        sscanf(line.c_str(), "%s %s", cellFootprint, cellName);
+        line = line.substr(line.find(string(cellName)) + string(cellName).length(),
+                line.length() - line.find(string(cellName)));
+        Gate *gate = new Gate(string(cellFootprint));
+        gate->name = cellName;
+        
+        char type1[10], type2[10], type3[10], value1[10], value2[10], value3[10];
+        string input1, input2, output;
+        if (string(cellFootprint) == "INVX1") {
+            sscanf(line.c_str(), "%s %s %s %s", type1, value1, type2, value2);
+            if (string(type1) == "ZN") {
+                output = string(value1);
+                input1 = string(value2);
+            } else if (string(type1).find("I") != string::npos) {
+                input1 = string(value1);
+                output = string(value2);
+            }
+
+            Net *i1 = new Net(string(input1));
+            Net *o = new Net(string(output));
+            i1->inputGate.push_back(gate);
+            o->outputGate.push_back(gate);
+            gate->inputNet.push_back(i1);
+            gate->outputNet.push_back(o);
+            cout << input1 << ' ' << output  << endl;
+
+        } else {
+            sscanf(line.c_str(), "%s %s %s %s %s %s", type1, value1,
+                    type2, value2, type3, value3);
+            if (string(type1) == "ZN") {
+                output = string(value1);
+                input1 = string(value2);
+                input2 = string(value3);
+            } else if (string(type1).find("A") != string::npos) {
+                input1 = string(value1);
+                input2 = string(value2);
+                output = string(value3);
+            }
+
+            Net *i1 = new Net(string(input1));
+            Net *i2 = new Net(string(input2));
+            Net *o = new Net(string(output));
+            i1->inputGate.push_back(gate);
+            i2->inputGate.push_back(gate);
+            o->outputGate.push_back(gate);
+            gate->inputNet.push_back(i1);
+            gate->inputNet.push_back(i2);
+            gate->outputNet.push_back(o);
+            cout << input1 << ' ' << input2 << ' ' << output  << endl;
+        }
+
+        circuit.circuitGate.push_back(gate);
     }
     
 }

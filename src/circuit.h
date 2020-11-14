@@ -5,6 +5,8 @@
 #include <vector>
 #include <map>
 
+class Net;
+
 /*
  * data structure of pin
  */
@@ -13,7 +15,6 @@ public:
     std::string footprint;
     int direction = -1;  // 0 for input, 1 for output, -1 for uninitialized
     float capacitance = 0.0;
-    std::string name;  // net variable name
 
     Pin(std::string f): footprint(f) {}
 private:
@@ -26,8 +27,10 @@ class Gate {
 public:
     std::string footprint;
     std::string name;
-    std::vector<Pin *> input;
-    std::vector<Pin *> output;
+    std::vector<Pin *> inputPin;
+    std::vector<Pin *> outputPin;
+    std::vector<Net *> inputNet;
+    std::vector<Net *> outputNet;
     std::map<std::pair<float, float>, float> rise_power;
     std::map<std::pair<float, float>, float> fall_power;
     std::map<std::pair<float, float>, float> cell_rise;
