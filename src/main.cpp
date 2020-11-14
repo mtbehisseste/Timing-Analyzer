@@ -37,15 +37,26 @@ int main(int argc, char *argv[]) {
             usage();
         }
     }
-    
+ 
     std::map<std::string, Gate *> libCell;
     readLibrary(libCell, libName);
 
     Circuit circuit;
     readCircuit(circuit, circuitName, libCell);
-    // for (int i = 0; i< circuit.inputNet.size(); ++i) {
-    //     std::cout << circuit.wireNet[i]->name << std::endl;
+    // for (auto i = circuit.inputNet.begin(); i != circuit.inputNet.end(); ++i) {
+    //     std::cout << i->first  << ' ' << i->second->name << std::endl;
     // }
+
+    std::vector<std::vector<int> > pattern;
+    pattern = readPattern(circuit, patternName);
+
+    using namespace std;
+    for (unsigned int i = 0; i< pattern.size(); ++i) {
+        for (unsigned int j = 0; j < pattern[0].size();++j) {
+            cout << pattern[i][j] << ' ' ;
+        }
+        cout <<endl;
+    }
 
     return 0;
 }

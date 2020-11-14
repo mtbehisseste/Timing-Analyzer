@@ -137,7 +137,7 @@ void readCircuit(Circuit &circuit, string circuitName,
         map<string, Gate *> libCell)
 {
     ifstream fsCircuit;
-    fsCircuit.open(circuitName, ios::in);
+    fsCircuit.open(circuitName.c_str(), ios::in);
     if (!fsCircuit) {
         cout << "Error opening circuit file\n";
         exit(-1);
@@ -267,5 +267,34 @@ void readCircuit(Circuit &circuit, string circuitName,
 
         circuit.circuitGate.insert(make_pair(gate->name, gate));
     }
-    
+}
+
+vector<vector<int> > readPattern(Circuit circuit, string patternName)
+{
+    ifstream fsPattern;
+    fsPattern.open(patternName.c_str(), ios::in);
+    if (!fsPattern) {
+        cout << "Error opening pattern file\n";
+        exit(-1);
+    }
+
+    int inputNetNum = circuit.inputNet.size();
+    string line;
+    char num[1];
+    vector<vector<int> > pattern;
+    while (getline(fsPattern, line)) {
+        if (line.find("end") != string::npos)
+            return pattern;
+        if (line.find("input") != string::npos)
+            continue;
+
+        vector<int> tmp;
+        for (int i = 0; i < inputNetNum; ++i) {
+            sscanf(line.c_str(), "%s", num);
+            tmp.push_back(atoi(num));
+            line = line.substr(line.find(num) + 1);
+        }
+        pattern.push_back(tmp);
+    }
+    return pattern;
 }
