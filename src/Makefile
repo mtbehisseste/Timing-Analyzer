@@ -1,10 +1,11 @@
 EXE = timing_analyzer
 OBJS = main.o readFile.o
+CFLAGS = -std=c++11 -g -Wall
 
 all: $(EXE)
 
 $(EXE): $(OBJS)
-	g++ -g -o $@ $^
+	g++ $(CFLAGS) -o $@ $^
 
 %.o: %.cpp
-	g++ -c -o $@ $^
+	g++ $(CFLAGS) -c -o $@ $^
