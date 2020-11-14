@@ -259,7 +259,7 @@ void readCircuit(Circuit &circuit, string circuitName,
             i2->inputGate.insert({gate->name, gate});
             o->outputGate.insert({gate->name, gate});
             gate->inputNet.insert({string(input1), i1});
-            gate->inputNet.insert({string(input1), i2});
+            gate->inputNet.insert({string(input2), i2});
             gate->outputNet.insert({string(output), o});
         }
 

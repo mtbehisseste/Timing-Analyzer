@@ -1,5 +1,5 @@
 EXE = timing_analyzer
-OBJS = main.o readFile.o
+OBJS = main.o readFile.o utils.o
 CFLAGS = -std=c++11 -g -Wall
 
 all: $(EXE)
