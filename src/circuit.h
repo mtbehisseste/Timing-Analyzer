@@ -2,7 +2,6 @@
 #define _CIRCUIT_H_
 
 #include <string>
-#include <vector>
 #include <map>
 
 class Net;
@@ -27,10 +26,10 @@ class Gate {
 public:
     std::string footprint;
     std::string name;
-    std::vector<Pin *> inputPin;
-    std::vector<Pin *> outputPin;
-    std::vector<Net *> inputNet;
-    std::vector<Net *> outputNet;
+    std::map<std::string, Pin *> inputPin;
+    std::map<std::string, Pin *> outputPin;
+    std::map<std::string, Net *> inputNet;
+    std::map<std::string, Net *> outputNet;
     std::map<std::pair<float, float>, float> rise_power;
     std::map<std::pair<float, float>, float> fall_power;
     std::map<std::pair<float, float>, float> cell_rise;
@@ -53,8 +52,8 @@ public:
     // if this net is input/output of the gates
     // the variable name of the net will also be
     // recorded in pin->name of the gate
-    std::vector<Gate *> inputGate;
-    std::vector<Gate *> outputGate;
+    std::map<std::string, Gate *> inputGate;
+    std::map<std::string, Gate *> outputGate;
 
     Net(std::string s): name(s){}
 private:
@@ -65,10 +64,10 @@ private:
  */
 class Circuit {
 public:
-    std::vector<Gate *> circuitGate;
-    std::vector<Net *> inputNet;
-    std::vector<Net *> outputNet;
-    std::vector<Net *> wireNet;
+    std::map<std::string, Gate *> circuitGate;
+    std::map<std::string, Net *> inputNet;
+    std::map<std::string, Net *> outputNet;
+    std::map<std::string, Net *> wireNet;
 private:
 };
 
