@@ -20,8 +20,8 @@ using namespace std;
         for (int j = 0; j < 7; ++j) {                                                   \
             sscanf(sf.c_str(), "%f%*s", &f);                                            \
             sf = sf.substr(sf.find_first_of(",") + 1);                                  \
-            cell->table.insert(make_pair(                                               \
-                        make_pair(outputCapacitance[i], inputTransitionTime[j]), f));   \
+            cell->table.insert({                                                        \
+                    make_pair(outputCapacitance[i], inputTransitionTime[j]), f});       \
         }                                                                               \
     }                                                                                   \
     getline(fLib, strline);
@@ -33,14 +33,14 @@ using namespace std;
         while (subline.find(",") != string::npos) {                                 \
             sscanf(subline.c_str(), "%[^,]", netName);                              \
             Net *net = new Net(string(netName));                                    \
-            circuit.circuitNet.insert(make_pair(net->name, net));             \
+            circuit.circuitNet.insert({net->name, net});                            \
             subline = subline.substr(subline.find_first_of(",") + 1);               \
         }                                                                           \
                                                                                     \
         if (subline.find(";") != string::npos) {                                    \
             sscanf(subline.c_str(), "%[^;]", netName);                              \
-            Net *net = new Net(string(netName));                                            \
-            circuit.circuitNet.insert(make_pair(net->name, net));             \
+            Net *net = new Net(string(netName));                                    \
+            circuit.circuitNet.insert({net->name, net});                            \
             break;                                                                  \
         }                                                                           \
                                                                                     \
@@ -121,15 +121,15 @@ void readLibrary(map<string, Gate *> &libCell, string libName)
                 getline(fLib, strline);  // }
                 getline(fLib, strline);  // }
                 getline(fLib, strline);  // }
-                cell->outputPin.insert(make_pair(pin->footprint, pin));
+                cell->outputPin.insert({pin->footprint, pin});
                 break;  // output pin must be the last pin
             } else {
                 getline(fLib, strline);  // }
-                cell->inputPin.insert(make_pair(pin->footprint, pin));
+                cell->inputPin.insert({pin->footprint, pin});
             }
         }
 
-        libCell.insert(make_pair(cell->name, cell));
+        libCell.insert({cell->name, cell});
     }
 }
 
@@ -234,11 +234,10 @@ void readCircuit(Circuit &circuit, string circuitName,
 
             Net *i1 = new Net(string(input1));
             Net *o = new Net(string(output));
-            i1->inputGate.insert(make_pair(gate->name, gate));
-            o->outputGate.insert(make_pair(gate->name, gate));
-            gate->inputNet.insert(make_pair(string(input1), i1));
-            gate->outputNet.insert(make_pair(string(output), o));
-            cout << input1 << ' ' << output  << endl;
+            i1->inputGate.insert({gate->name, gate});
+            o->outputGate.insert({gate->name, gate});
+            gate->inputNet.insert({string(input1), i1});
+            gate->outputNet.insert({string(output), o});
 
         } else {
             sscanf(line.c_str(), "%s %s %s %s %s %s", type1, value1,
@@ -256,16 +255,15 @@ void readCircuit(Circuit &circuit, string circuitName,
             Net *i1 = new Net(string(input1));
             Net *i2 = new Net(string(input2));
             Net *o = new Net(string(output));
-            i1->inputGate.insert(make_pair(gate->name, gate));
-            i2->inputGate.insert(make_pair(gate->name, gate));
-            o->outputGate.insert(make_pair(gate->name, gate));
-            gate->inputNet.insert(make_pair(string(input1), i1));
-            gate->inputNet.insert(make_pair(string(input1), i2));
-            gate->outputNet.insert(make_pair(string(output), o));
-            cout << input1 << ' ' << input2 << ' ' << output  << endl;
+            i1->inputGate.insert({gate->name, gate});
+            i2->inputGate.insert({gate->name, gate});
+            o->outputGate.insert({gate->name, gate});
+            gate->inputNet.insert({string(input1), i1});
+            gate->inputNet.insert({string(input1), i2});
+            gate->outputNet.insert({string(output), o});
         }
 
-        circuit.circuitGate.insert(make_pair(gate->name, gate));
+        circuit.circuitGate.insert({gate->name, gate});
     }
 }
 
