@@ -34,6 +34,7 @@ using namespace std;
             sscanf(subline.c_str(), "%[^,]", netName);                              \
             Net *net = new Net(string(netName));                                    \
             circuit.circuitNet.insert({net->name, net});                            \
+            circuit.allNet.insert({net->name, net});                                \
             subline = subline.substr(subline.find_first_of(",") + 1);               \
         }                                                                           \
                                                                                     \
@@ -41,6 +42,7 @@ using namespace std;
             sscanf(subline.c_str(), "%[^;]", netName);                              \
             Net *net = new Net(string(netName));                                    \
             circuit.circuitNet.insert({net->name, net});                            \
+            circuit.allNet.insert({net->name, net});                                \
             break;                                                                  \
         }                                                                           \
                                                                                     \
@@ -232,12 +234,10 @@ void readCircuit(Circuit &circuit, string circuitName,
                 output = string(value2);
             }
 
-            Net *i1 = new Net(string(input1));
-            Net *o = new Net(string(output));
-            i1->inputGate.insert({gate->name, gate});
-            o->outputGate.insert({gate->name, gate});
-            gate->inputNet.insert({string(input1), i1});
-            gate->outputNet.insert({string(output), o});
+            circuit.allNet[input1]->inputGate.insert({gate->name, gate});
+            circuit.allNet[output]->outputGate.insert({gate->name, gate});
+            gate->inputNet.insert({input1, circuit.allNet[input1]});
+            gate->outputNet.insert({output, circuit.allNet[output]});
 
         } else {
             sscanf(line.c_str(), "%s %s %s %s %s %s", type1, value1,
@@ -252,15 +252,12 @@ void readCircuit(Circuit &circuit, string circuitName,
                 output = string(value3);
             }
 
-            Net *i1 = new Net(string(input1));
-            Net *i2 = new Net(string(input2));
-            Net *o = new Net(string(output));
-            i1->inputGate.insert({gate->name, gate});
-            i2->inputGate.insert({gate->name, gate});
-            o->outputGate.insert({gate->name, gate});
-            gate->inputNet.insert({string(input1), i1});
-            gate->inputNet.insert({string(input2), i2});
-            gate->outputNet.insert({string(output), o});
+            circuit.allNet[input1]->inputGate.insert({gate->name, gate});
+            circuit.allNet[input2]->inputGate.insert({gate->name, gate});
+            circuit.allNet[output]->outputGate.insert({gate->name, gate});
+            gate->inputNet.insert({input1, circuit.allNet[input1]});
+            gate->inputNet.insert({input2, circuit.allNet[input2]});
+            gate->outputNet.insert({output, circuit.allNet[output]});
         }
 
         circuit.circuitGate.insert({gate->name, gate});

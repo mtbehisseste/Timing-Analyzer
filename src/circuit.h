@@ -36,6 +36,8 @@ public:
     std::map<std::pair<float, float>, float> cell_fall;
     std::map<std::pair<float, float>, float> rise_transition;
     std::map<std::pair<float, float>, float> fall_transition;
+    
+    bool visited = false;
 
     Gate(std::string footprint): footprint(footprint) {}
 
@@ -68,6 +70,7 @@ public:
     std::map<std::string, Net *> inputNet;
     std::map<std::string, Net *> outputNet;
     std::map<std::string, Net *> wireNet;
+    std::map<std::string, Net *> allNet;  // this map contains all input, output, wire
 private:
 };
 
