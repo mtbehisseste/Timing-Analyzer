@@ -287,6 +287,8 @@ vector<vector<int> > readPattern(Circuit circuit, string patternName)
             return pattern;
         if (line.find("input") != string::npos)
             continue;
+        if (line.find("//") == 0)
+            continue;
 
         vector<int> tmp;
         for (int i = 0; i < inputNetNum; ++i) {
