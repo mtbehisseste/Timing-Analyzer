@@ -28,13 +28,14 @@ void runPattern(Circuit &circuit, vector<int> pattern)
     
     while (q.size() > 0) {
         Net *tmp = q.front();
-        if (tmp->type == 1) {
+        // cout << "top " << tmp->name << ' ' ;
+        // cout << tmp->signal << endl;
+        if (tmp->signal == -1) {
             q.pop();
+            q.push(tmp);
             continue;
         }
 
-        // cout << "top " << tmp->name << ' ' ;
-        // cout << tmp->signal << endl;
         int sig;
         bool noSig;
         for (auto &netConnGateName: tmp->inputGateName) {
