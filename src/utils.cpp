@@ -21,43 +21,47 @@ void runPattern(Circuit &circuit, vector<int> pattern)
 
     // assign input patter to circuit input
     int patternIdx = 0;
-    for (auto &iN: circuit.inputNet) {
-        iN.second->signal = pattern[patternIdx++];
-        q.push(iN.second);
+    for (auto &iN: circuit.inputNetName) {
+        circuit.allNet[iN]->signal = pattern[patternIdx++];
+        q.push(circuit.allNet[iN]);
     }
     
     while (q.size() > 0) {
         Net *tmp = q.front();
+        if (tmp->type == 1) {
+            q.pop();
+            continue;
+        }
+
         // cout << "top " << tmp->name << ' ' ;
         // cout << tmp->signal << endl;
         int sig;
-        string outputNetName;
         bool noSig;
-        for (auto &netConnGate: tmp->inputGate) {
-            if (netConnGate.second->visited)
+        for (auto &netConnGateName: tmp->inputGateName) {
+            if (circuit.circuitGate[netConnGateName]->visited)
                 continue;
 
-            Net *outN = netConnGate.second->outputNet.begin()->second;
+            Net *outN = circuit.allNet[circuit.circuitGate[netConnGateName]->outputNetName[0]];
             sig = tmp->signal;
             noSig = false;
-            for (auto &gateInputNet: netConnGate.second->inputNet) {
-                if (gateInputNet.second->signal == -1) {  // signal not generated
-                    // cout << "nosig " << gateInputNet.first <<' ' << gateInputNet.second->signal<< endl;
+            for (auto &gateInputNetName: circuit.circuitGate[netConnGateName]->inputNetName) {
+                if (circuit.allNet[gateInputNetName]->signal == -1) {  // signal not generated
+                    // cout << "nosig " << gateInputNet.first <<' ' << circuit.allNet[gateInputNetName]->signal<< endl;
                     noSig = true;
-                    q.push(gateInputNet.second);
+                    q.push(circuit.allNet[gateInputNetName]);
                     break;
                 }
 
                 // calculate output signal
-                if (netConnGate.second->footprint == "NANDX1") {
+                if (circuit.circuitGate[netConnGateName]->footprint == "NANDX1") {
                     // cout << gateInputNet.first << " ";
-                    // cout << sig << ' ' << gateInputNet.second->signal << endl;
-                    sig &= gateInputNet.second->signal;
+                    // cout << sig << ' ' << circuit.allNet[gateInputNetName]->signal << endl;
+                    sig &= circuit.allNet[gateInputNetName]->signal;
                     // cout << sig << endl;
-                } else if (netConnGate.second->footprint == "NOR2X1") {
+                } else if (circuit.circuitGate[netConnGateName]->footprint == "NOR2X1") {
                     // cout << gateInputNet.first << " ";
-                    // cout << sig << ' ' << gateInputNet.second->signal << endl;
-                    sig |= gateInputNet.second->signal;
+                    // cout << sig << ' ' << circuit.allNet[gateInputNetName]->signal << endl;
+                    sig |= circuit.allNet[gateInputNetName]->signal;
                     // cout << sig << endl;
                 }
             }
@@ -65,16 +69,16 @@ void runPattern(Circuit &circuit, vector<int> pattern)
                 outN->signal = sig ^ 1;  // perform not
                 // cout << "sig " << outN->name << ' ' << outN->signal << endl;
                 q.push(outN);
-                netConnGate.second->visited = true;
+                circuit.circuitGate[netConnGateName]->visited = true;
             }
         }
         q.pop();
     }
     cout << endl;
 
-    for (auto &g: circuit.circuitGate) {
-        cout << g.first<< " ";
-        cout << g.second->outputNet.begin()->second->signal << endl;
+    for (auto &g: circuit.circuitGateName) {
+        cout << g<< " ";
+        cout << circuit.allNet[circuit.circuitGate[g]->outputNetName[0]]->signal << endl;
     }
     cout << endl;
 }

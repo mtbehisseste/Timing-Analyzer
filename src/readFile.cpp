@@ -26,14 +26,15 @@ using namespace std;
     }                                                                                   \
     getline(fLib, strline);
 
-#define FIND_NET(circuitNet)                                                        \
+#define FIND_NET(circuitNetVector, typeNum)                                         \
     while (true) {                                                                  \
         subline = line;                                                             \
         subline.erase(remove(subline.begin(), subline.end(), ' '), subline.end());  \
         while (subline.find(",") != string::npos) {                                 \
             sscanf(subline.c_str(), "%[^,]", netName);                              \
             Net *net = new Net(string(netName));                                    \
-            circuit.circuitNet.insert({net->name, net});                            \
+            net->type = typeNum;                                                    \
+            circuit.circuitNetVector.push_back(net->name);                          \
             circuit.allNet.insert({net->name, net});                                \
             subline = subline.substr(subline.find_first_of(",") + 1);               \
         }                                                                           \
@@ -41,7 +42,8 @@ using namespace std;
         if (subline.find(";") != string::npos) {                                    \
             sscanf(subline.c_str(), "%[^;]", netName);                              \
             Net *net = new Net(string(netName));                                    \
-            circuit.circuitNet.insert({net->name, net});                            \
+            net->type = typeNum;                                                    \
+            circuit.circuitNetVector.push_back(net->name);                          \
             circuit.allNet.insert({net->name, net});                                \
             break;                                                                  \
         }                                                                           \
@@ -157,7 +159,7 @@ void readCircuit(Circuit &circuit, string circuitName,
                     (line.find("//") != string::npos &&
                     line.find("input") < line.find("//"))) {
                 line = line.substr(line.find("input") + 6);
-                FIND_NET(inputNet);
+                FIND_NET(inputNetName, 0);
                 netFlag++;
             }
         } else if (line.find("output") != string::npos) {
@@ -165,7 +167,7 @@ void readCircuit(Circuit &circuit, string circuitName,
                     (line.find("//") != string::npos &&
                     line.find("output") < line.find("//"))) {
                 line = line.substr(line.find("output") + 7);
-                FIND_NET(outputNet);
+                FIND_NET(outputNetName, 1);
                 netFlag++;
             }
         } else if (line.find("wire") != string::npos) {
@@ -173,7 +175,7 @@ void readCircuit(Circuit &circuit, string circuitName,
                     (line.find("//") != string::npos &&
                     line.find("wire") < line.find("//"))) {
                 line = line.substr(line.find("wire") + 5);
-                FIND_NET(wireNet);
+                FIND_NET(wireNetName, 2);
                 netFlag++;
             }
         }
@@ -234,10 +236,10 @@ void readCircuit(Circuit &circuit, string circuitName,
                 output = string(value2);
             }
 
-            circuit.allNet[input1]->inputGate.insert({gate->name, gate});
-            circuit.allNet[output]->outputGate.insert({gate->name, gate});
-            gate->inputNet.insert({input1, circuit.allNet[input1]});
-            gate->outputNet.insert({output, circuit.allNet[output]});
+            circuit.allNet[input1]->inputGateName.push_back(gate->name);
+            circuit.allNet[output]->outputGateName.push_back(gate->name);
+            gate->inputNetName.push_back(input1);
+            gate->outputNetName.push_back(output);
 
         } else {
             sscanf(line.c_str(), "%s %s %s %s %s %s", type1, value1,
@@ -252,19 +254,20 @@ void readCircuit(Circuit &circuit, string circuitName,
                 output = string(value3);
             }
 
-            circuit.allNet[input1]->inputGate.insert({gate->name, gate});
-            circuit.allNet[input2]->inputGate.insert({gate->name, gate});
-            circuit.allNet[output]->outputGate.insert({gate->name, gate});
-            gate->inputNet.insert({input1, circuit.allNet[input1]});
-            gate->inputNet.insert({input2, circuit.allNet[input2]});
-            gate->outputNet.insert({output, circuit.allNet[output]});
+            circuit.allNet[input1]->inputGateName.push_back(gate->name);
+            circuit.allNet[input2]->inputGateName.push_back(gate->name);
+            circuit.allNet[output]->outputGateName.push_back(gate->name);
+            gate->inputNetName.push_back(input1);
+            gate->inputNetName.push_back(input2);
+            gate->outputNetName.push_back(output);
         }
 
+        circuit.circuitGateName.push_back(gate->name);
         circuit.circuitGate.insert({gate->name, gate});
     }
 }
 
-vector<vector<int> > readPattern(Circuit circuit, string patternName)
+vector<vector<int> > readPattern(Circuit &circuit, string patternName)
 {
     ifstream fsPattern;
     fsPattern.open(patternName.c_str(), ios::in);
@@ -273,7 +276,7 @@ vector<vector<int> > readPattern(Circuit circuit, string patternName)
         exit(-1);
     }
 
-    int inputNetNum = circuit.inputNet.size();
+    int inputNetNum = circuit.inputNetName.size();
     string line;
     char num[1];
     vector<vector<int> > pattern;
