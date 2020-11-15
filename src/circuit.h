@@ -27,6 +27,7 @@ class Gate {
 public:
     std::string footprint;
     std::string name;
+    // string store the variable name of the net that connect to this pin
     std::map<std::string, Pin *> inputPin;
     std::map<std::string, Pin *> outputPin;
     std::vector<std::string> inputNetName;
@@ -39,6 +40,8 @@ public:
     std::map<std::pair<float, float>, float> fall_transition;
     
     bool visited = false;
+    float cellDelay = 0.0;
+    float outputTransition = 0.0;
 
     Gate(std::string footprint): footprint(footprint) {}
 
@@ -56,7 +59,8 @@ public:
 
     // if this net is input/output of the gates
     // the variable name of the net will also be
-    // recorded in outputNetName of the gate
+    // recorded in outputNetName of the gate and
+    // inputPin/outputPin
     std::vector<std::string> inputGateName;
     std::vector<std::string> outputGateName;
 

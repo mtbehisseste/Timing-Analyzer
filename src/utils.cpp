@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <queue>
+#include <map>
 
 #include "utils.h"
 
@@ -15,7 +16,82 @@ void usage()
     exit(-1);
 }
 
-void runPattern(Circuit &circuit, vector<int> pattern)
+float interpolation(map<pair<float, float>, float> &table,
+        float outputCapacitance, float inputTransitionTime,
+        float o1, float o2, float i1, float i2)
+{
+    float t1, t2, t3, t4;  // table order left->right, up->down
+    float tmp1, tmp2;
+    t1 = table[make_pair(o1, i1)];
+    t2 = table[make_pair(o2, i1)];
+    t3 = table[make_pair(o1, i2)];
+    t4 = table[make_pair(o2, i2)];
+    tmp1 = t1 + (inputTransitionTime - i1) / (i2 - i1) * (t3 - t1);
+    tmp2 = t2 + (inputTransitionTime - i1) / (i2 - i1) * (t4 - t2);
+    return tmp1 + (outputCapacitance - o1) / (o2 - o1) * (tmp2 - tmp1);
+}
+
+void calcDelay(Circuit &circuit, map<string, Gate *> libCell, Gate *&gate, int outputSignal)
+{
+    float outputCapacitance = 0.0;
+    float inputTransitionTime = 0.0;
+
+    // find pins of the successor gates to calculate output capacitance
+    Pin *p;
+    string cellFootprint;
+    for (auto netConnGateName: circuit.allNet[gate->outputNetName[0]]->inputGateName) {
+        cellFootprint = circuit.circuitGate[netConnGateName]->footprint;
+        p = circuit.circuitGate[netConnGateName]->inputPin[gate->outputNetName[0]];
+        outputCapacitance += libCell[cellFootprint]->inputPin[p->footprint]->capacitance;
+    }
+
+    // find preceding gates of all the input nets of the gate, then get their output
+    // capacitance
+    for (auto inNetName: gate->inputNetName) {
+        for (auto outGateName: circuit.allNet[inNetName]->outputGateName) {
+            inputTransitionTime += circuit.circuitGate[outGateName]->outputTransition;
+        }
+    }
+
+    if (outputCapacitance == 0)
+        outputCapacitance = 0.3;
+
+    // calculate output transition time
+    float o1 = 0.0, o2 = 0.0, i1 = 0.0, i2 = 0.0;
+    for (auto it = libCell[gate->footprint]->cell_fall.begin();
+            it != libCell[gate->footprint]->cell_fall.end(); ++it) {
+        if (it->first.first < outputCapacitance)
+            o1 = it->first.first;
+        else {
+            o2 = it->first.first;
+            break;
+        }
+    }
+    for (auto it = libCell[gate->footprint]->cell_fall.begin();
+            it != libCell[gate->footprint]->cell_fall.end(); ++it) {
+        if (inputTransitionTime == 0) {
+            i1 = libCell[gate->footprint]->cell_fall.begin()->first.second;
+            i2 = next(libCell[gate->footprint]->cell_fall.begin(), 1)->first.second;
+            break;
+        }
+        if (it->first.second < inputTransitionTime)
+            i1 = it->first.second;
+        else {
+            i2 = it->first.second;
+            break;
+        }
+    }
+
+    if (outputSignal == 0) {
+        gate->outputTransition = interpolation(libCell[gate->footprint]->fall_transition,
+                outputCapacitance, inputTransitionTime, o1, o2, i1, i2) / 2;
+    } else if (outputSignal == 1) {
+        gate->outputTransition = interpolation(libCell[gate->footprint]->rise_transition,
+                outputCapacitance, inputTransitionTime, o1, o2, i1, i2) / 2;
+    }
+}
+
+void runPattern(Circuit &circuit, vector<int> pattern, map<string, Gate *> libCell)
 {
     queue<Net *> q;
 
@@ -39,8 +115,8 @@ void runPattern(Circuit &circuit, vector<int> pattern)
         int sig;
         bool noSig;
         for (auto &netConnGateName: tmp->inputGateName) {
-            if (circuit.circuitGate[netConnGateName]->visited)
-                continue;
+            // if (circuit.circuitGate[netConnGateName]->visited)
+            //     continue;
 
             Net *outN = circuit.allNet[circuit.circuitGate[netConnGateName]->outputNetName[0]];
             sig = tmp->signal;
@@ -71,15 +147,19 @@ void runPattern(Circuit &circuit, vector<int> pattern)
                 // cout << "sig " << outN->name << ' ' << outN->signal << endl;
                 q.push(outN);
                 circuit.circuitGate[netConnGateName]->visited = true;
+
+                calcDelay(circuit, libCell, circuit.circuitGate[netConnGateName], outN->signal);
             }
+
         }
         q.pop();
     }
     cout << endl;
 
     for (auto &g: circuit.circuitGateName) {
-        cout << g<< " ";
-        cout << circuit.allNet[circuit.circuitGate[g]->outputNetName[0]]->signal << endl;
+        cout << g << " ";
+        cout << circuit.allNet[circuit.circuitGate[g]->outputNetName[0]]->signal << " ";
+        cout << circuit.circuitGate[g]->outputTransition << endl;
     }
     cout << endl;
 }
@@ -91,3 +171,4 @@ void reset(Circuit &circuit)
     for (auto &g: circuit.circuitGate)
         g.second->visited = false;
 }
+
