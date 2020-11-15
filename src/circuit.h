@@ -58,6 +58,7 @@ public:
     std::map<std::string, Gate *> outputGate;
 
     Net(std::string s): name(s){}
+
 private:
 };
 

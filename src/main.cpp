@@ -54,7 +54,9 @@ int main(int argc, char *argv[]) {
     // run each pattern
     for (unsigned int i = 0; i < pattern.size(); ++i) {
         runPattern(circuit, pattern[i]);
+        reset(circuit);
     }
+
 
     // TODO delet all newed objects
 
