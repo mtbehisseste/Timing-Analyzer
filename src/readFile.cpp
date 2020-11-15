@@ -133,7 +133,7 @@ void readLibrary(map<string, Gate *> &libCell, string libName)
             }
         }
 
-        libCell.insert({cell->name, cell});
+        libCell.insert({cell->footprint, cell});
     }
 }
 
@@ -226,15 +226,22 @@ void readCircuit(Circuit &circuit, string circuitName,
         
         char type1[10], type2[10], type3[10], value1[10], value2[10], value3[10];
         string input1, input2, output;
+        Pin *i1, *i2, *o;
         if (string(cellFootprint) == "INVX1") {
             sscanf(line.c_str(), "%s %s %s %s", type1, value1, type2, value2);
             if (string(type1) == "ZN") {
+                i1 = new Pin(string(type2));
+                o = new Pin(string(type1));
                 output = string(value1);
                 input1 = string(value2);
             } else if (string(type1).find("I") != string::npos) {
+                i1 = new Pin(string(type1));
+                o = new Pin(string(type2));
                 input1 = string(value1);
                 output = string(value2);
             }
+            gate->inputPin.insert({input1, i1});
+            gate->outputPin.insert({output, o});
 
             circuit.allNet[input1]->inputGateName.push_back(gate->name);
             circuit.allNet[output]->outputGateName.push_back(gate->name);
@@ -245,14 +252,23 @@ void readCircuit(Circuit &circuit, string circuitName,
             sscanf(line.c_str(), "%s %s %s %s %s %s", type1, value1,
                     type2, value2, type3, value3);
             if (string(type1) == "ZN") {
+                i1 = new Pin(string(type2));
+                i2 = new Pin(string(type3));
+                o = new Pin(string(type1));
                 output = string(value1);
                 input1 = string(value2);
                 input2 = string(value3);
             } else if (string(type1).find("A") != string::npos) {
+                i1 = new Pin(string(type1));
+                i2 = new Pin(string(type2));
+                o = new Pin(string(type3));
                 input1 = string(value1);
                 input2 = string(value2);
                 output = string(value3);
             }
+            gate->inputPin.insert({input1, i1});
+            gate->inputPin.insert({input2, i2});
+            gate->outputPin.insert({output, o});
 
             circuit.allNet[input1]->inputGateName.push_back(gate->name);
             circuit.allNet[input2]->inputGateName.push_back(gate->name);
