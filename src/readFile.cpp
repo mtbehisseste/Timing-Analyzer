@@ -21,7 +21,7 @@ using namespace std;
             sscanf(sf.c_str(), "%f%*s", &f);                                            \
             sf = sf.substr(sf.find_first_of(",") + 1);                                  \
             cell->table.insert({                                                        \
-                    make_pair(outputCapacitance[i], inputTransitionTime[j]), f});       \
+                    make_pair(inputTransitionTime[i], outputCapacitance[j]), f});       \
         }                                                                               \
     }                                                                                   \
     getline(fLib, strline);
@@ -91,6 +91,11 @@ void readLibrary(map<string, Gate *> &libCell, string libName)
         }
         sscanf(strline.c_str(), "cell (%[^)] {", s);
         Gate *cell = new Gate(string(s));
+
+        for (int i = 0; i < 7; ++i) {
+            cell->index1.push_back(outputCapacitance[i]);
+            cell->index2.push_back(inputTransitionTime[i]);
+        }
 
         // pin
         while (getline(fLib, strline)) {

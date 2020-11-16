@@ -32,6 +32,8 @@ public:
     std::map<std::string, Pin *> outputPin;
     std::vector<std::string> inputNetName;
     std::vector<std::string> outputNetName;
+    std::vector<float> index1;  // used only for librarcy cells
+    std::vector<float> index2;  // used only for librarcy cells
     std::map<std::pair<float, float>, float> rise_power;
     std::map<std::pair<float, float>, float> fall_power;
     std::map<std::pair<float, float>, float> cell_rise;
