@@ -51,7 +51,7 @@ using namespace std;
         getline(fsCircuit, line);                                                   \
     }
 
-void readLibrary(map<string, Gate *> &libCell, string libName)
+void readLibrary(map<string, Cell *> &libCell, string libName)
 {
     ifstream fLib;
     fLib.open(libName.c_str(), ios::in);
@@ -90,7 +90,7 @@ void readLibrary(map<string, Gate *> &libCell, string libName)
                 break;
         }
         sscanf(strline.c_str(), "cell (%[^)] {", s);
-        Gate *cell = new Gate(string(s));
+        Cell *cell = new Cell(string(s));
 
         for (int i = 0; i < 7; ++i) {
             cell->index1.push_back(outputCapacitance[i]);
@@ -142,8 +142,7 @@ void readLibrary(map<string, Gate *> &libCell, string libName)
     }
 }
 
-void readCircuit(Circuit &circuit, string circuitName,
-        map<string, Gate *> libCell)
+void readCircuit(Circuit &circuit, string circuitName)
 {
     ifstream fsCircuit;
     fsCircuit.open(circuitName.c_str(), ios::in);

@@ -33,11 +33,11 @@ int main(int argc, char *argv[]) {
         }
     }
  
-    map<string, Gate *> libCell;
+    map<string, Cell *> libCell;
     readLibrary(libCell, libName);
 
     Circuit circuit;
-    readCircuit(circuit, circuitName, libCell);
+    readCircuit(circuit, circuitName);
     // for (auto i = circuit.inputNet.begin(); i != circuit.inputNet.end(); ++i) {
     //     cout << i->first  << ' ' << i->second->name << endl;
     // }
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 
     // run each pattern
     for (unsigned int i = 0; i < pattern.size(); ++i) {
-        runPattern(circuit, pattern[i]);
+        runPattern(circuit, pattern[i], libCell);
         reset(circuit);
     }
 

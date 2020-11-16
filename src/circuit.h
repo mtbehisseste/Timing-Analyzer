@@ -21,29 +21,46 @@ private:
 };
 
 /*
- * data structure of gate
+ * data structure of library cell
  */
-class Gate {
+class Cell {
 public:
     std::string footprint;
-    std::string name;
-    // string store the variable name of the net that connect to this pin
     std::map<std::string, Pin *> inputPin;
     std::map<std::string, Pin *> outputPin;
-    std::vector<std::string> inputNetName;
-    std::vector<std::string> outputNetName;
-    std::vector<float> index1;  // used only for librarcy cells
-    std::vector<float> index2;  // used only for librarcy cells
+    std::vector<float> index1;
+    std::vector<float> index2;
     std::map<std::pair<float, float>, float> rise_power;
     std::map<std::pair<float, float>, float> fall_power;
     std::map<std::pair<float, float>, float> cell_rise;
     std::map<std::pair<float, float>, float> cell_fall;
     std::map<std::pair<float, float>, float> rise_transition;
     std::map<std::pair<float, float>, float> fall_transition;
-    
+
+    Cell(std::string footprint): footprint(footprint) {}
+
+private:
+};
+
+/*
+ * data structure of gate
+ */
+class Gate {
+public:
+    std::string footprint;
+    std::string name;
+
+    // string store the variable name of the net that connect to this pin
+    std::map<std::string, Pin *> inputPin;
+    std::map<std::string, Pin *> outputPin;
+    std::vector<std::string> inputNetName;
+    std::vector<std::string> outputNetName;
+
     bool visited = false;
     float cellDelay = 0.0;
     float outputTransition = 0.0;
+    float currentMaxDelay = 0.0;
+    std::string maxDelayPrecedingNetName;
 
     Gate(std::string footprint): footprint(footprint) {}
 
