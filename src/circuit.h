@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <stack>
 
 class Net;
 
@@ -99,6 +100,10 @@ public:
     std::vector<std::string> wireNetName;
     std::map<std::string, Gate *> circuitGate;
     std::map<std::string, Net *> allNet;  // this map contains all input, output, wire
+
+    // longest delay path for a single input pattern
+    float maxDelay;
+    std::stack<std::string> longestPath;
 private:
 };
 

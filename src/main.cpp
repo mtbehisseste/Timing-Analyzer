@@ -51,9 +51,22 @@ int main(int argc, char *argv[]) {
     //     cout <<endl;
     // }
 
+    // output stream
+    circuitName = circuitName.substr(circuitName.find_last_of("/") + 1);
+    string outputFileName = "0866015_" +
+        circuitName.substr(0, circuitName.find(".v")) + ".txt";
+
+    ofstream fout;
+    fout.open(outputFileName.c_str(), ios::out);
+    if (!fout) {
+        cout << "Error opening output file\n";
+        exit(-1);
+    }
+
     // run each pattern
     for (unsigned int i = 0; i < pattern.size(); ++i) {
         runPattern(circuit, pattern[i], libCell);
+        outputToFile(circuit, fout);
         reset(circuit);
     }
 

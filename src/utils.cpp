@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 #include <queue>
 #include <map>
 #include <stack>
@@ -210,36 +211,17 @@ void runPattern(Circuit &circuit, vector<int> pattern, map<string, Cell *> libCe
             }
         }
     }
-    cout << endl;
 
-    stack<string> longestPath;
+    circuit.maxDelay = maxDelay;
     Gate *g = circuit.circuitGate[maxDelayGateName];
     while (true) {
-        cout << g->name << endl;
-        longestPath.push(g->outputNetName[0]);
+        circuit.longestPath.push(g->outputNetName[0]);
         if (g->maxDelayPrecedingGateName == "PI") {
             // reach input nets
-            longestPath.push(g->inputNetName[0]);
+            circuit.longestPath.push(g->inputNetName[0]);
             break;
         }
         g = circuit.circuitGate[g->maxDelayPrecedingGateName];
-    }
-
-    cout << "Longest delay = " << maxDelay << ", the path is:\n";
-    while (longestPath.size() > 0) {
-        cout << longestPath.top();
-        if (longestPath.size() > 1)
-            cout << " -> ";
-        longestPath.pop();
-    }
-    cout << endl << endl;
-
-    // output
-    for (auto &g: circuit.circuitGateName) {
-        cout << g << " ";
-        cout << circuit.allNet[circuit.circuitGate[g]->outputNetName[0]]->signal << " ";
-        cout << circuit.circuitGate[g]->cellDelay << " ";
-        cout << circuit.circuitGate[g]->outputTransition << endl;
     }
 }
 
@@ -251,3 +233,24 @@ void reset(Circuit &circuit)
         g.second->visited = false;
 }
 
+void outputToFile(Circuit &circuit, ofstream &fout)
+{
+    fout << "Longest delay = " << circuit.maxDelay << ", the path is:\n";
+    while (circuit.longestPath.size() > 0) {
+        fout << circuit.longestPath.top();
+        if (circuit.longestPath.size() > 1)
+            fout << " -> ";
+        circuit.longestPath.pop();
+    }
+    fout << endl << endl;
+
+    // output
+    for (auto &g: circuit.circuitGateName) {
+        fout << g << " ";
+        fout << circuit.allNet[circuit.circuitGate[g]->outputNetName[0]]->signal << " ";
+        fout << circuit.circuitGate[g]->cellDelay;
+        fout << " ";
+        fout << circuit.circuitGate[g]->outputTransition << endl;
+    }
+    fout << endl;
+}
