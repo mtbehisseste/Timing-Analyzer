@@ -61,7 +61,10 @@ int main(int argc, char *argv[]) {
         reset(circuit);
     }
 
-    // TODO delet all newed objects
+    // delet all newed objects
+    for (auto &lc: libCell) {
+        lc.second->deleteClass();
+    }
 
     return 0;
 }

@@ -40,6 +40,15 @@ public:
 
     Cell(std::string footprint): footprint(footprint) {}
 
+    void deleteClass() {
+        for (auto &ipin: inputPin) {
+            delete ipin.second;
+        }
+        for (auto &opin: outputPin) {
+            delete opin.second;
+        }
+    }
+
 private:
 };
 
@@ -64,6 +73,15 @@ public:
     std::string maxDelayPrecedingGateName;
 
     Gate(std::string footprint): footprint(footprint) {}
+
+    void deleteClass() {
+        for (auto &ipin: inputPin) {
+            delete ipin.second;
+        }
+        for (auto &opin: outputPin) {
+            delete opin.second;
+        }
+    }
 
 private:
 };
@@ -104,6 +122,16 @@ public:
     // longest delay path for a single input pattern
     float maxDelay;
     std::stack<std::string> longestPath;
+
+    ~Circuit() {
+        for (auto &gate: circuitGate) {
+            gate.second->deleteClass();
+        }
+        for (auto &net: allNet) {
+            delete net.second;
+        }
+    }
+
 private:
 };
 
