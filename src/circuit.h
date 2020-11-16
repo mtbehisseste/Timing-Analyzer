@@ -60,7 +60,7 @@ public:
     float cellDelay = 0.0;
     float outputTransition = 0.0;
     float currentMaxDelay = 0.0;
-    std::string maxDelayPrecedingNetName;
+    std::string maxDelayPrecedingGateName;
 
     Gate(std::string footprint): footprint(footprint) {}
 
