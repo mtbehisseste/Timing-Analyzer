@@ -38,18 +38,9 @@ int main(int argc, char *argv[]) {
 
     Circuit circuit;
     readCircuit(circuit, circuitName);
-    // for (auto i = circuit.inputNet.begin(); i != circuit.inputNet.end(); ++i) {
-    //     cout << i->first  << ' ' << i->second->name << endl;
-    // }
 
     vector<vector<int> > pattern;
     pattern = readPattern(circuit, patternName);
-    // for (unsigned int i = 0; i< pattern.size(); ++i) {
-    //     for (unsigned int j = 0; j < pattern[0].size();++j) {
-    //         cout << pattern[i][j] << ' ' ;
-    //     }
-    //     cout <<endl;
-    // }
 
     // output stream
     circuitName = circuitName.substr(circuitName.find_last_of("/") + 1);
@@ -69,7 +60,6 @@ int main(int argc, char *argv[]) {
         outputToFile(circuit, fout);
         reset(circuit);
     }
-
 
     // TODO delet all newed objects
 
