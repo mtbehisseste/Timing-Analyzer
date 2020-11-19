@@ -18,12 +18,12 @@ void usage()
     exit(-1);
 }
 
-float interpolation(map<pair<float, float>, float> &table,
-        float outputCapacitance, float inputTransitionTime,
-        float o1, float o2, float i1, float i2)
+double interpolation(map<pair<double, double>, double> &table,
+        double outputCapacitance, double inputTransitionTime,
+        double o1, double o2, double i1, double i2)
 {
-    float t1, t2, t3, t4;  // table order left->right, up->down
-    float tmp1, tmp2, result;
+    double t1, t2, t3, t4;  // table order left->right, up->down
+    double tmp1, tmp2, result;
     t1 = table[make_pair(i1, o1)];
     t2 = table[make_pair(i1, o2)];
     t3 = table[make_pair(i2, o1)];
@@ -36,8 +36,8 @@ float interpolation(map<pair<float, float>, float> &table,
 
 void calcDelay(Circuit &circuit, map<string, Cell *> libCell, Gate *&gate, int outputSignal)
 {
-    float outputCapacitance = 0.0;
-    float inputTransitionTime = 0.0;
+    double outputCapacitance = 0.0;
+    double inputTransitionTime = 0.0;
 
     // find pins of the successor gates to calculate output capacitance
     Pin *p;
@@ -52,7 +52,7 @@ void calcDelay(Circuit &circuit, map<string, Cell *> libCell, Gate *&gate, int o
 
     // find preceding gates of all the input nets of the gate, then get their output
     // capacitance
-    float maxInputTransitionTime = 0.0;
+    double maxInputTransitionTime = 0.0;
     for (auto inNetName: gate->inputNetName) {
         for (auto outGateName: circuit.allNet[inNetName]->outputGateName) {
             maxInputTransitionTime = max(maxInputTransitionTime, 
@@ -62,7 +62,7 @@ void calcDelay(Circuit &circuit, map<string, Cell *> libCell, Gate *&gate, int o
     inputTransitionTime = maxInputTransitionTime;
 
     // finding table index
-    float o1 = 0.0, o2 = 0.0, i1 = 0.0, i2 = 0.0;
+    double o1 = 0.0, o2 = 0.0, i1 = 0.0, i2 = 0.0;
     for (auto it = libCell[gate->footprint]->cell_fall.begin();
             it != libCell[gate->footprint]->cell_fall.end(); ++it) {
         if (it->first.second > outputCapacitance) {
@@ -87,7 +87,7 @@ void calcDelay(Circuit &circuit, map<string, Cell *> libCell, Gate *&gate, int o
         }
     }
 
-    float cellFall = 0.0, cellRise = 0.0;
+    double cellFall = 0.0, cellRise = 0.0;
     if (outputSignal == 0) {
         gate->outputTransition = interpolation(libCell[gate->footprint]->fall_transition,
                 outputCapacitance, inputTransitionTime, o1, o2, i1, i2);
@@ -102,7 +102,7 @@ void calcDelay(Circuit &circuit, map<string, Cell *> libCell, Gate *&gate, int o
     gate->cellDelay = max(cellFall, cellRise);
 
     // find longest delay
-    float longestPrecedingDelay = 0.0;
+    double longestPrecedingDelay = 0.0;
     string longestDelayGateName = "PI";
     for (auto inNetName: gate->inputNetName) {
         for (auto outGateName: circuit.allNet[inNetName]->outputGateName) {
@@ -127,7 +127,7 @@ void runPattern(Circuit &circuit, vector<int> pattern, map<string, Cell *> libCe
         q.push(circuit.allNet[iN]);
     }
     
-    float maxDelay = -1;
+    double maxDelay = -1;
     string maxDelayGateName;
     while (q.size() > 0) {
         Net *tmp = q.front();

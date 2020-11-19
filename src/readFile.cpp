@@ -18,7 +18,7 @@ using namespace std;
         last_quote = strline.find_last_of("\"");                                        \
         sf = strline.substr(first_quote + 1, last_quote - first_quote - 1);             \
         for (int j = 0; j < 7; ++j) {                                                   \
-            sscanf(sf.c_str(), "%f%*s", &f);                                            \
+            sscanf(sf.c_str(), "%lf%*s", &f);                                            \
             sf = sf.substr(sf.find_first_of(",") + 1);                                  \
             cell->table.insert({                                                        \
                     make_pair(inputTransitionTime[i], outputCapacitance[j]), f});       \
@@ -68,21 +68,21 @@ void readLibrary(map<string, Cell *> &libCell, string libName)
         getline(fLib, strline);
 
     // record output net capacitances and input transition time
-    float outputCapacitance[7], inputTransitionTime[7];
+    double outputCapacitance[7], inputTransitionTime[7];
 
     getline(fLib, strline);  // index 1
-    sscanf(strline.c_str(), "%*s \(\"%f,%f,%f,%f,%f,%f,%f\"%*s", &outputCapacitance[0],
+    sscanf(strline.c_str(), "%*s \(\"%lf,%lf,%lf,%lf,%lf,%lf,%lf\"%*s", &outputCapacitance[0],
             &outputCapacitance[1], &outputCapacitance[2], &outputCapacitance[3],
             &outputCapacitance[4], &outputCapacitance[5], &outputCapacitance[6]);
 
     getline(fLib, strline);  // index 2
-    sscanf(strline.c_str(), "%*s \(\"%f,%f,%f,%f,%f,%f,%f\"%*s", &inputTransitionTime[0],
+    sscanf(strline.c_str(), "%*s \(\"%lf,%lf,%lf,%lf,%lf,%lf,%lf\"%*s", &inputTransitionTime[0],
             &inputTransitionTime[1], &inputTransitionTime[2], &inputTransitionTime[3],
             &inputTransitionTime[4], &inputTransitionTime[5], &inputTransitionTime[6]);
 
     // parse library cells
     char s[20];
-    float f;
+    double f;
     while (!fLib.eof()) {
         // cell
         while (getline(fLib, strline)) {
@@ -108,7 +108,7 @@ void readLibrary(map<string, Cell *> &libCell, string libName)
             pin->direction = (string(s) == "input" ? 0 : 1);
 
             getline(fLib, strline);
-            sscanf(strline.c_str(), " capacitance : %f;", &f);
+            sscanf(strline.c_str(), " capacitance : %lf;", &f);
             pin->capacitance = f;
 
             // if is output pin

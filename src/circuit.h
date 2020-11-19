@@ -15,7 +15,7 @@ class Pin {
 public:
     std::string footprint;
     int direction = -1;  // 0 for input, 1 for output, -1 for uninitialized
-    float capacitance = 0.0;
+    double capacitance = 0.0;
 
     Pin(std::string f): footprint(f) {}
 private:
@@ -29,14 +29,14 @@ public:
     std::string footprint;
     std::map<std::string, Pin *> inputPin;
     std::map<std::string, Pin *> outputPin;
-    std::vector<float> index1;
-    std::vector<float> index2;
-    std::map<std::pair<float, float>, float> rise_power;
-    std::map<std::pair<float, float>, float> fall_power;
-    std::map<std::pair<float, float>, float> cell_rise;
-    std::map<std::pair<float, float>, float> cell_fall;
-    std::map<std::pair<float, float>, float> rise_transition;
-    std::map<std::pair<float, float>, float> fall_transition;
+    std::vector<double> index1;
+    std::vector<double> index2;
+    std::map<std::pair<double, double>, double> rise_power;
+    std::map<std::pair<double, double>, double> fall_power;
+    std::map<std::pair<double, double>, double> cell_rise;
+    std::map<std::pair<double, double>, double> cell_fall;
+    std::map<std::pair<double, double>, double> rise_transition;
+    std::map<std::pair<double, double>, double> fall_transition;
 
     Cell(std::string footprint): footprint(footprint) {}
 
@@ -67,9 +67,9 @@ public:
     std::vector<std::string> outputNetName;
 
     bool visited = false;
-    float cellDelay = 0.0;
-    float outputTransition = 0.0;
-    float currentMaxDelay = 0.0;
+    double cellDelay = 0.0;
+    double outputTransition = 0.0;
+    double currentMaxDelay = 0.0;
     std::string maxDelayPrecedingGateName;
 
     Gate(std::string footprint): footprint(footprint) {}
@@ -120,7 +120,7 @@ public:
     std::map<std::string, Net *> allNet;  // this map contains all input, output, wire
 
     // longest delay path for a single input pattern
-    float maxDelay;
+    double maxDelay;
     std::stack<std::string> longestPath;
 
     ~Circuit() {
