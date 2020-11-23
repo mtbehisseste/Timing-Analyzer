@@ -298,7 +298,7 @@ vector<vector<int> > readPattern(Circuit &circuit, string patternName)
 
     int inputNetNum = circuit.inputNetName.size();
     string line;
-    char num[1];
+    char num[2];
     vector<vector<int> > pattern;
     while (getline(fsPattern, line)) {
         if (line.find("end") != string::npos)
